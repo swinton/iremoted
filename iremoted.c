@@ -81,8 +81,8 @@ static int driveKeynote = 0;
 
 void            usage(void);
 OSStatus        KeynoteChangeSlide(AEEventID eventID);
-inline          void print_errmsg_if_io_err(int expr, char *msg);
-inline          void print_errmsg_if_err(int expr, char *msg);
+void            print_errmsg_if_io_err(int expr, char *msg);
+void            print_errmsg_if_err(int expr, char *msg);
 void            QueueCallbackFunction(void *target, IOReturn result,
                                       void *refcon, void *sender);
 bool            addQueueCallbacks(IOHIDQueueInterface **hqi);
@@ -152,7 +152,7 @@ KeynoteChangeSlide(AEEventID eventID)
     return err;
 }
 
-inline void
+void
 print_errmsg_if_io_err(int expr, char *msg)
 {
     IOReturn err = (expr);
@@ -165,7 +165,7 @@ print_errmsg_if_io_err(int expr, char *msg)
     }
 }
 
-inline void
+void
 print_errmsg_if_err(int expr, char *msg)
 {
     if (expr) {
@@ -187,7 +187,7 @@ QueueCallbackFunction(void *target, IOReturn result, void *refcon, void *sender)
         hqi = (IOHIDQueueInterface **)sender;
         ret = (*hqi)->getNextEvent(hqi, &event, zeroTime, 0);
         if (!ret) {
-            printf("%#lx %s\n", (UInt32)event.elementCookie,
+            printf("%#x %s\n", (unsigned int)event.elementCookie,
                    (event.value == 0) ? "depressed" : "pressed");
             fflush(stdout);
             if (event.value && driveKeynote) {
