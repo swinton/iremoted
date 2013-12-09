@@ -8,7 +8,7 @@ To use this feature you have to start the program with commandline option "-a".
 #### Getting started
 Compile iremoted like so:
 
-$ gcc -Wall -o iremoted iremoted.c -framework IOKit -framework Carbon
+    $ gcc -Wall -o iremoted iremoted.c -framework IOKit -framework Carbon
 
 
 #### Usage
