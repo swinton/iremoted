@@ -29,7 +29,7 @@ Code is originally copied from <http://www.osxbook.com/software/iremoted/>.
 
 Copyright (c) 2006-2008 Amit Singh. All Rights Reserved.
 
-Keyboard arrow event extension (c) 2013 by Manuel Peuster <manuel@peuster.de>
+Keyboard arrow event extension (c) 2013 by Manuel Peuster.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
