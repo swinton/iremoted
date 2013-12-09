@@ -21,8 +21,9 @@ Compile iremoted like so:
 
 #### Credits
 
-Original repository, see <https://github.com/swinton/iremoted>
-This modified version of iremoted originally copied from <http://www.osxbook.com/software/iremoted/>.
+Original iremoted repository, see <https://github.com/swinton/iremoted>
+
+Code is originally copied from <http://www.osxbook.com/software/iremoted/>.
 
 #### Copyright
 
