@@ -1,31 +1,34 @@
-Apple Infrared Remote Daemon - Display events received from the Apple Infrared Remote
-====================================================================================
+### Apple Infrared Remote Daemon with Keyboard Arrow Event Extension
 
-Getting started
----------------
+This is the extended (forked) version of irmoted. It sends keyboard arrow events left/right/up/down
+to the system when the left/right/up/down buttons on the Apple Remote are pressed.
+This can be used to control PDF based presentations shown in the Preview.app (or others).
+To use this feature you have to start the program with commandline option "-a".
+
+#### Getting started
 Compile iremoted like so:
 
 $ gcc -Wall -o iremoted iremoted.c -framework IOKit -framework Carbon
 
 
-Usage
------
-    $ ./iremoted 
-    0x16 pressed 
-    0x16 released 
-    0x17 pressed 
-    0x17 released 
-    ...
+#### Usage
 
-For more info, see <http://www.osxbook.com/software/iremoted/>.
+    $ ./iremoted -a
 
-Credits
--------
+#### TODO
+
+	* Disable volume controls when pressing up/down
+
+#### Credits
+
+Original repository, see <https://github.com/swinton/iremoted>
 This modified version of iremoted originally copied from <http://www.osxbook.com/software/iremoted/>.
 
-Copyright
----------
+#### Copyright
+
 Copyright (c) 2006-2008 Amit Singh. All Rights Reserved.
+
+Keyboard arrow event extension (c) 2013 by Manuel Peuster <manuel@peuster.de>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
