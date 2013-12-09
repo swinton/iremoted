@@ -2,7 +2,7 @@
 
 This is the extended (forked) version of irmoted. It sends keyboard arrow events left/right/up/down
 to the system when the left/right/up/down buttons on the Apple Remote are pressed.
-This can be used to control PDF based presentations shown in the Preview.app (or others).
+This can be used to control PDF (Latex) based presentations shown in the Preview.app (or others).
 To use this feature you have to start the program with commandline option "-a".
 
 #### Getting started
@@ -17,7 +17,7 @@ $ gcc -Wall -o iremoted iremoted.c -framework IOKit -framework Carbon
 
 #### TODO
 
-	* Disable volume controls when pressing up/down
+* Disable volume controls when pressing up/down
 
 #### Credits
 
