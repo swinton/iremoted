@@ -6,6 +6,8 @@
  *
  * Copyright (c) 2006-2008 Amit Singh. All Rights Reserved.
  *
+ * Keyboard arrow event extension (c) 2013 by Manuel Peuster <manuel@peuster.de>
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
@@ -48,17 +50,21 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <Carbon/Carbon.h>
 
+
 static struct option
 long_options[] = {
     { "help",    no_argument, 0, 'h' },
     { "keynote", no_argument, 0, 'k' },
+    { "arrows", no_argument, 0, 'a' },
     { 0, 0, 0, 0 },
 };
 
-static const char *options = "hk";
+static const char *options = "hka";
 
 IOHIDElementCookie buttonNextID = 0;
 IOHIDElementCookie buttonPreviousID = 0;
+IOHIDElementCookie buttonUpID = 0;
+IOHIDElementCookie buttonDownID = 0;
 
 typedef struct cookie_struct
 {
@@ -78,11 +84,12 @@ enum {
 
 static const char *keynoteID = "com.apple.iWork.Keynote";
 static int driveKeynote = 0;
+static int driveKeyboardArrows = 0;
 
 void            usage(void);
 OSStatus        KeynoteChangeSlide(AEEventID eventID);
-inline          void print_errmsg_if_io_err(int expr, char *msg);
-inline          void print_errmsg_if_err(int expr, char *msg);
+void            print_errmsg_if_io_err(int expr, char *msg);
+void            print_errmsg_if_err(int expr, char *msg);
 void            QueueCallbackFunction(void *target, IOReturn result,
                                       void *refcon, void *sender);
 bool            addQueueCallbacks(IOHIDQueueInterface **hqi);
@@ -100,10 +107,12 @@ usage(void)
 {
     printf("%s (version %s)\n", PROGNAME, PROGVERS);
     printf("Copyright (c) 2006-2008 Amit Singh. All Rights Reserved.\n");
-    printf("Displays events received from the Apple Infrared Remote.\n");
+    printf("Displays events received from the Apple Infrared Remote.\n\n");
+    printf("Keyboard arrow event extension (c) 2013 by Manuel Peuster <manuel@peuster.de>.\n\n");
     printf("Usage: %s [OPTIONS...]\n\nOptions:\n", PROGNAME);
     printf("  -h, --help    print this help message and exit\n");
     printf("  -k, --keynote use forward/backward button presses for Keynote slide transition\n\n");
+    printf("  -a, --arrows use forward/backward/up/down button presses to generate the corresponding \n\t\tkeyboard arrow events (e.g. for Preview.app slide transition)\n\n");
     printf("Please report bugs using the following contact information:\n"
            "<URL:http://www.osxbook.com/software/bugs/>\n");
 }
@@ -152,7 +161,7 @@ KeynoteChangeSlide(AEEventID eventID)
     return err;
 }
 
-inline void
+void
 print_errmsg_if_io_err(int expr, char *msg)
 {
     IOReturn err = (expr);
@@ -165,7 +174,7 @@ print_errmsg_if_io_err(int expr, char *msg)
     }
 }
 
-inline void
+void
 print_errmsg_if_err(int expr, char *msg)
 {
     if (expr) {
@@ -187,9 +196,34 @@ QueueCallbackFunction(void *target, IOReturn result, void *refcon, void *sender)
         hqi = (IOHIDQueueInterface **)sender;
         ret = (*hqi)->getNextEvent(hqi, &event, zeroTime, 0);
         if (!ret) {
-            printf("%#lx %s\n", (UInt32)event.elementCookie,
+            printf("%#x %s\n", (unsigned int)event.elementCookie,
                    (event.value == 0) ? "depressed" : "pressed");
             fflush(stdout);
+            if(event.value && driveKeyboardArrows) {
+                // select correct CGKeyCode
+                CGKeyCode keycode = 0;
+                if (event.elementCookie == buttonNextID)
+                    keycode = (CGKeyCode)124; // right
+                else if (event.elementCookie == buttonPreviousID)
+                    keycode = (CGKeyCode)123; // left
+                else if (event.elementCookie == buttonUpID)
+                    keycode = (CGKeyCode)126; // up
+                else if (event.elementCookie == buttonDownID)
+                    keycode = (CGKeyCode)125; // down
+                
+                if (keycode) {
+                    printf("Sending keystroke with CGKeyCode: %hu\n", keycode);
+                    // define events
+                    CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, keycode, true);
+                    CGEventRef keyUp = CGEventCreateKeyboardEvent(NULL, keycode, false);
+                    // send key down and up events
+                    CGEventPost(kCGAnnotatedSessionEventTap, keyDown);
+                    CGEventPost(kCGAnnotatedSessionEventTap, keyUp);
+                    // release resources
+                    CFRelease(keyUp);
+                    CFRelease(keyDown);
+                }
+            }
             if (event.value && driveKeynote) {
                 if (event.elementCookie == buttonNextID)
                     KeynoteChangeSlide(slideForward);
@@ -352,9 +386,11 @@ getHIDCookies(IOHIDDeviceInterface122 **handle)
                 cookies->gButtonCookie_SystemMenuLeft = cookie;
                 break;
             case kHIDUsage_GD_SystemMenuUp:
+                buttonUpID = cookie;
                 cookies->gButtonCookie_SystemMenuUp = cookie;
                 break;
             case kHIDUsage_GD_SystemMenuDown:
+                buttonDownID = cookie;
                 cookies->gButtonCookie_SystemMenuDown = cookie;
                 break;
             }
@@ -452,6 +488,9 @@ main (int argc, char **argv)
             break;
         case 'k':
             driveKeynote = 1;
+            break;
+        case 'a':
+            driveKeyboardArrows = 1;
             break;
         default:
             usage();
